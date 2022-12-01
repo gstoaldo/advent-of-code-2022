@@ -17,3 +17,15 @@ func TestGetElfMaxCalories(t *testing.T) {
 		t.Errorf("want: %v, got: %v", want, got)
 	}
 }
+
+func TestGetTop3CaloriesSum(t *testing.T) {
+	input := utils.ParseFile("example.txt", parser)
+	elves := input.([]Elf)
+
+	want := 45000
+	got := getTop3CaloriesSum(elves)
+
+	if got != want {
+		t.Errorf("want: %v, got: %v", want, got)
+	}
+}
