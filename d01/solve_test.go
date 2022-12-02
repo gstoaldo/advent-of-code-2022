@@ -10,22 +10,14 @@ func TestGetElfMaxCalories(t *testing.T) {
 	input := utils.ParseFile("example.txt", parser)
 	elves := input.([]Elf)
 
-	want := 24000
 	got := getElfMaxCalories(elves)
-
-	if got != want {
-		t.Errorf("want: %v, got: %v", want, got)
-	}
+	utils.Assert(t, 24000, got)
 }
 
 func TestGetTop3CaloriesSum(t *testing.T) {
 	input := utils.ParseFile("example.txt", parser)
 	elves := input.([]Elf)
 
-	want := 45000
 	got := getTop3CaloriesSum(elves)
-
-	if got != want {
-		t.Errorf("want: %v, got: %v", want, got)
-	}
+	utils.Assert(t, 45000, got)
 }

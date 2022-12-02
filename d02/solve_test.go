@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/gstoaldo/advent-of-code-2022/utils"
+)
 
 func TestGetRoundScore(t *testing.T) {
 	tcs := []struct {
@@ -17,23 +21,14 @@ func TestGetRoundScore(t *testing.T) {
 
 	for _, tc := range tcs {
 		got := getRoundScore(tc.opShape, mapColumn[tc.myShape])
-		want := tc.want
-
-		if got != want {
-			t.Errorf("want: %v, got: %v", want, got)
-		}
+		utils.Assert(t, tc.want, got)
 	}
 }
 
 func TestGetTotalScore(t *testing.T) {
 	rounds := parseFile("example.txt")
-
-	want := 15
 	got := getTotalScore(rounds)
-
-	if got != want {
-		t.Errorf("want: %v, got: %v", want, got)
-	}
+	utils.Assert(t, 15, got)
 }
 
 func TestGetShapeToResult(t *testing.T) {
@@ -50,10 +45,6 @@ func TestGetShapeToResult(t *testing.T) {
 
 	for _, tc := range tcs {
 		got := getShapeToResult(tc.opShape, tc.result)
-		want := tc.want
-
-		if got != want {
-			t.Errorf("want: %v, got: %v", want, got)
-		}
+		utils.Assert(t, tc.want, got)
 	}
 }
