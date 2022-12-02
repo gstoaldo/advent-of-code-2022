@@ -16,7 +16,7 @@ func TestGetRoundScore(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		got := getRoundScore(tc.opShape, tc.myShape)
+		got := getRoundScore(tc.opShape, mapColumn[tc.myShape])
 		want := tc.want
 
 		if got != want {
@@ -33,5 +33,27 @@ func TestGetTotalScore(t *testing.T) {
 
 	if got != want {
 		t.Errorf("want: %v, got: %v", want, got)
+	}
+}
+
+func TestGetShapeToResult(t *testing.T) {
+	tcs := []struct {
+		opShape string
+		result  string
+		want    string
+	}{
+		{"A", "Y", "A"},
+		{"B", "X", "A"},
+		{"C", "Z", "A"},
+		{"A", "X", "C"},
+	}
+
+	for _, tc := range tcs {
+		got := getShapeToResult(tc.opShape, tc.result)
+		want := tc.want
+
+		if got != want {
+			t.Errorf("want: %v, got: %v", want, got)
+		}
 	}
 }
