@@ -16,31 +16,56 @@ func getItemPriority(item string) int {
 	return int(itemRune) - base + 1
 }
 
-func getRepeatedItem(bag string) string {
-	leftComp := bag[:len(bag)/2]
-	rightComp := bag[len(bag)/2:]
+func getCommomItems(itemsA string, itemsB string) string {
+	commomItems := ""
 
-	leftCompSet := map[rune]bool{}
+	itemsASet := map[rune]bool{}
 
-	for _, item := range leftComp {
-		leftCompSet[item] = true
+	for _, item := range itemsA {
+		itemsASet[item] = true
 	}
 
-	for _, item := range rightComp {
-		if _, ok := leftCompSet[item]; ok {
-			return string(item)
+	for _, item := range itemsB {
+		if _, ok := itemsASet[item]; ok {
+			commomItems += string(item)
 		}
 	}
 
-	return ""
+	return commomItems
 }
 
 func getPrioritySum(bags []string) int {
 	sum := 0
 
 	for _, bag := range bags {
-		repeatedItem := getRepeatedItem(bag)
+		leftComp := bag[:len(bag)/2]
+		rightComp := bag[len(bag)/2:]
+		repeatedItem := getCommomItems(leftComp, rightComp)
 		sum += getItemPriority(repeatedItem)
+	}
+
+	return sum
+}
+
+func getGroupCommomItem(group []string) string {
+	commomItems := group[0]
+
+	for i := 1; i < len(group); i++ {
+		commomItems = getCommomItems(commomItems, group[i])
+	}
+
+	return string(commomItems[0])
+}
+
+func getGroupPrioritySum(bags []string) int {
+	sum := 0
+	groupSize := 3
+	for i := 0; i <= len(bags)-3; i += groupSize {
+		group := bags[i : i+groupSize]
+
+		groupCommomItem := getGroupCommomItem(group)
+
+		sum += getItemPriority(groupCommomItem)
 	}
 
 	return sum
@@ -51,8 +76,14 @@ func part1(input []string) {
 	fmt.Println("part 1:", answer)
 }
 
+func part2(input []string) {
+	answer := getGroupPrioritySum(input)
+	fmt.Println("part 2:", answer)
+}
+
 func main() {
 	input := parseFile("input.txt")
 
 	part1(input)
+	part2(input)
 }

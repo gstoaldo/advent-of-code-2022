@@ -27,7 +27,7 @@ func TestGetItemPriority(t *testing.T) {
 	}
 }
 
-func TestGetRepeatedItem(t *testing.T) {
+func TestGetCommomItems(t *testing.T) {
 	tcs := []struct {
 		bag  string
 		want string
@@ -42,7 +42,31 @@ func TestGetRepeatedItem(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run("", func(t *testing.T) {
-			got := getRepeatedItem(tc.bag)
+			leftComp := tc.bag[:len(tc.bag)/2]
+			rightComp := tc.bag[len(tc.bag)/2:]
+
+			got := getCommomItems(leftComp, rightComp)
+			utils.Assert(t, tc.want, string(got[0]))
+		})
+	}
+}
+
+func TestGetGroupCommomItem(t *testing.T) {
+
+	tcs := []struct {
+		group []string
+		want  string
+	}{
+		{
+			[]string{"ABc", "QcF", "PGc"}, "c",
+		},
+		{example[0:3], "r"},
+		{example[3:], "Z"},
+	}
+
+	for _, tc := range tcs {
+		t.Run("", func(t *testing.T) {
+			got := getGroupCommomItem(tc.group)
 			utils.Assert(t, tc.want, got)
 		})
 	}
