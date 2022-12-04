@@ -28,3 +28,24 @@ func TestIsFullyContained(t *testing.T) {
 		})
 	}
 }
+
+func TestIsOverlap(t *testing.T) {
+	tcs := []struct {
+		arg  []int
+		want bool
+	}{
+		{example[0], false},
+		{example[1], false},
+		{example[2], true},
+		{example[3], true},
+		{example[4], true},
+		{example[5], true},
+	}
+
+	for _, tc := range tcs {
+		t.Run("", func(t *testing.T) {
+			got := isOverlap(tc.arg)
+			utils.Assert(t, tc.want, got)
+		})
+	}
+}
