@@ -21,9 +21,9 @@ func TestRunMove(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run("", func(t *testing.T) {
-			runMove(tc.stacks, tc.move)
+			got := runMove(tc.stacks, tc.move, 1)
 
-			assert.Equal(t, tc.want, tc.stacks)
+			assert.Equal(t, tc.want, got)
 		})
 	}
 }
