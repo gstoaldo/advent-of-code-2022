@@ -40,11 +40,13 @@ func part1(input inputType) {
 }
 
 func part2(input inputType) {
+	windowSize := 14
+	answer := findMarker(input, windowSize)
+	fmt.Println("part 2:", answer)
 }
 
 func main() {
 	input := parseFile("input.txt")
-	fmt.Println(input)
 
 	part1(input)
 	part2(input)
