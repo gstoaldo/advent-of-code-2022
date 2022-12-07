@@ -52,3 +52,12 @@ func TestGetAllDirectorySize(t *testing.T) {
 	want := []int{48381165, 94853, 584, 24933642}
 	assert.Equal(t, want, getAllDirectorySize(example))
 }
+func TestGetSizeToFree(t *testing.T) {
+	want := 8381165
+	utils.Assert(t, want, getSizeToFree(example))
+}
+
+func TestGetSmallestDirectorySizeToFree(t *testing.T) {
+	want := 24933642
+	utils.Assert(t, want, getSmallestDirectorySizeToFree(example))
+}

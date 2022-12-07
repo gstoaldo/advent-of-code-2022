@@ -6,10 +6,13 @@ import (
 	"strconv"
 )
 
+var movesInPattern = `\$ cd [\w\/]+`
+var filePattern = `(\d{1,})\s([a-z.]+)`
+
 func findDirectoryEndIndex(output inputType, startIndex int) int {
 	level := 0
 
-	re := regexp.MustCompile(`\$ cd [\w\/]+`)
+	re := regexp.MustCompile(movesInPattern)
 
 	for i, line := range output[startIndex:] {
 		if re.MatchString(line) {
@@ -33,7 +36,7 @@ func getDirectoryTotalSize(output inputType, startIndex int, endIndex int) int {
 	totalSize := 0
 	window := output[startIndex : endIndex+1]
 
-	re := regexp.MustCompile(`(\d{1,})\s([a-z.]+)`)
+	re := regexp.MustCompile(filePattern)
 
 	for _, line := range window {
 		match := re.FindStringSubmatch(line)
@@ -51,7 +54,7 @@ func getDirectoryTotalSize(output inputType, startIndex int, endIndex int) int {
 func getAllDirectorySize(output inputType) []int {
 	sizes := []int{}
 
-	re := regexp.MustCompile(`\$ cd [\w\/]+`)
+	re := regexp.MustCompile(movesInPattern)
 
 	for startIndex, line := range output {
 		if re.MatchString(line) {
@@ -78,12 +81,41 @@ func getCandidatesSum(output inputType) int {
 	return candidatesSum
 }
 
+func getSizeToFree(output inputType) int {
+	spaceAvailable := 70000000
+	spaceNecessary := 30000000
+
+	usedSize := getDirectoryTotalSize(output, 0, len(output)-1)
+	unusedSize := spaceAvailable - usedSize
+	sizeToFree := spaceNecessary - unusedSize
+
+	return sizeToFree
+}
+
+func getSmallestDirectorySizeToFree(output inputType) int {
+	sizeToFree := getSizeToFree(output)
+
+	sizes := getAllDirectorySize(output)
+
+	minSize := sizes[0] // root directory
+
+	for _, size := range sizes {
+		if size >= sizeToFree && size < minSize {
+			minSize = size
+		}
+	}
+
+	return minSize
+}
+
 func part1(input inputType) {
 	answer := getCandidatesSum(input)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputType) {
+	answer := getSmallestDirectorySizeToFree(input)
+	fmt.Println("part 2:", answer)
 }
 
 func main() {
