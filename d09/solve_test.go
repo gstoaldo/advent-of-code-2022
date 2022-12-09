@@ -29,7 +29,7 @@ func TestIsTouching(t *testing.T) {
 	}
 }
 
-func TestCalcTailMove(t *testing.T) {
+func TestCalcTailVector(t *testing.T) {
 	tcs := []struct {
 		head position
 		tail position
@@ -44,7 +44,7 @@ func TestCalcTailMove(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run("", func(t *testing.T) {
-			utils.Assert(t, tc.want, calcTailMove(tc.head, tc.tail))
+			utils.Assert(t, tc.want, calcTailVector(tc.head, tc.tail))
 		})
 	}
 }

@@ -17,15 +17,17 @@ type position struct {
 	j int
 }
 
+type vector position
+
 func isTouching(head position, tail position) bool {
 	return math.Abs(float64(head.i-tail.i)) <= 1 && math.Abs(float64(head.j-tail.j)) <= 1
 }
 
-func move(startPosition position, di int, dj int) position {
-	return position{startPosition.i + di, startPosition.j + dj}
+func moveByVector(startPosition position, v vector) position {
+	return position{startPosition.i + v.i, startPosition.j + v.j}
 }
 
-func calcTailMove(head position, tail position) position {
+func calcTailVector(head position, tail position) vector {
 	delta := position{head.i - tail.i, head.j - tail.j}
 
 	diNormalized := 0
@@ -38,24 +40,22 @@ func calcTailMove(head position, tail position) position {
 		djNormalized = delta.j / int(math.Abs(float64(delta.j)))
 	}
 
-	return position{diNormalized, djNormalized}
+	return vector{diNormalized, djNormalized}
 }
 
-func moveHeadAndTail(headStart position, tailStart position, di int, dj int) (position, position) {
-	headEnd := move(headStart, di, dj)
-
-	if isTouching(headEnd, tailStart) {
-		return headEnd, tailStart
+func moveTail(head position, tailStart position) position {
+	if isTouching(head, tailStart) {
+		return tailStart
 	}
 
-	tailMove := calcTailMove(headEnd, tailStart)
-	tailEnd := move(tailStart, tailMove.i, tailMove.j)
+	vector := calcTailVector(head, tailStart)
+	tailEnd := moveByVector(tailStart, vector)
 
-	return headEnd, tailEnd
+	return tailEnd
 }
 
-func getStepMove(step stepType) position {
-	moveMap := map[string]position{
+func getStepVector(step stepType) vector {
+	moveMap := map[string]vector{
 		"R": {0, 1},
 		"L": {0, -1},
 		"U": {1, 0},
@@ -65,19 +65,31 @@ func getStepMove(step stepType) position {
 	return moveMap[step.direction]
 }
 
-func runSteps(steps inputType) int {
-	head := position{0, 0}
-	tail := position{0, 0}
+func simulate(steps inputType, nknots int) int {
+	knots := []position{}
+
+	for i := 0; i < nknots; i++ {
+		knots = append(knots, position{0, 0})
+	}
+
+	tail := knots[len(knots)-1]
 
 	tailPathSet := map[position]bool{
 		tail: true,
 	}
 
 	for _, step := range steps {
-		movement := getStepMove(step)
+		vector := getStepVector(step)
 		for i := 0; i < step.value; i++ {
-			head, tail = moveHeadAndTail(head, tail, movement.i, movement.j)
-			tailPathSet[tail] = true
+			knots[0] = moveByVector(knots[0], vector)
+
+			for i := 1; i < len(knots); i++ {
+				knots[i] = moveTail(knots[i-1], knots[i])
+
+				if i == len(knots)-1 {
+					tailPathSet[knots[i]] = true
+				}
+			}
 		}
 	}
 
@@ -85,12 +97,12 @@ func runSteps(steps inputType) int {
 }
 
 func part1(input inputType) {
-	answer := runSteps(input)
+	answer := simulate(input, 2)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputType) {
-	answer := ""
+	answer := simulate(input, 10)
 	fmt.Println("part 2:", answer)
 }
 
