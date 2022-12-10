@@ -51,14 +51,43 @@ func calcSumSignalStrenth(instructions inputType) int {
 	return sum
 }
 
+func mapCycleToGrid(ncycle int) (int, int) {
+	return (ncycle - 1) / 40, (ncycle - 1) % 40
+}
+
+func renderGrid(grid [6][40]bool) {
+	for _, row := range grid {
+		for _, isLit := range row {
+			if isLit {
+				fmt.Print("#")
+			} else {
+				fmt.Print(".")
+			}
+		}
+		fmt.Print("\n")
+	}
+}
+
+func render(instructions inputType) {
+	grid := [6][40]bool{}
+
+	for ncycle := 1; ncycle <= 240; ncycle++ {
+		position := registerValueAtCycle(instructions, ncycle)
+		i, j := mapCycleToGrid(ncycle)
+
+		grid[i][j] = j >= position-1 && j <= position+1
+	}
+
+	renderGrid(grid)
+}
+
 func part1(input inputType) {
 	answer := calcSumSignalStrenth(input)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputType) {
-	answer := ""
-	fmt.Println("part 2:", answer)
+	render(input)
 }
 
 func main() {
