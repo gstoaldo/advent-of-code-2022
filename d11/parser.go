@@ -11,14 +11,17 @@ var numbersRe = regexp.MustCompile(`\d+`)               // match numbers
 var operationRe = regexp.MustCompile(`([\*+])\s(\w+)$`) // match operation symbol and last word
 
 func parser(path string) inputType {
+	mmc := 1
+
 	file, _ := ioutil.ReadFile(path)
 
 	chunks := strings.Split(string(file), "\n\n")
 
-	monkeys := inputType{}
+	monkeys := []monkey{}
 
 	for _, chunk := range chunks {
 		lines := strings.Split(chunk, "\n")
+
 		// starting items
 		itemsStr := numbersRe.FindAllString(lines[1], -1)
 		items := []int{}
@@ -69,10 +72,11 @@ func parser(path string) inputType {
 			return nextIdxIfFalse
 		}
 
+		mmc *= divisor
 		monkeys = append(monkeys, monkey{items, opsFunc, testFunc, 0})
 	}
 
-	return monkeys
+	return inputType{monkeys, mmc}
 }
 
 func parseFile(path string) inputType {

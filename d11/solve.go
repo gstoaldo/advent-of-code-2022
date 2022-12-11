@@ -5,7 +5,10 @@ import (
 	"sort"
 )
 
-type inputType []monkey
+type inputType struct {
+	monkeys []monkey
+	mmc     int
+}
 
 type monkey struct {
 	items               []int
@@ -14,11 +17,11 @@ type monkey struct {
 	inspectedItemsCount int
 }
 
-func runRounds(monkeys inputType, nrounds int) {
+func runRounds(monkeys []monkey, nrounds int, relief func(int) int) {
 	for n := 0; n < nrounds; n++ {
 		for i, monkey := range monkeys {
 			for _, item := range monkey.items {
-				nextWorryLevel := monkey.opsFunc(item) / 3
+				nextWorryLevel := relief(monkey.opsFunc(item))
 				nextMonkey := monkey.nextFunc(nextWorryLevel)
 
 				monkeys[nextMonkey].items = append(monkeys[nextMonkey].items, nextWorryLevel)
@@ -29,7 +32,7 @@ func runRounds(monkeys inputType, nrounds int) {
 	}
 }
 
-func calcMonkeyBusinessLevel(monkeys inputType) int {
+func calcMonkeyBusinessLevel(monkeys []monkey) int {
 	inspectedItemsCount := []int{}
 
 	for _, m := range monkeys {
@@ -41,17 +44,35 @@ func calcMonkeyBusinessLevel(monkeys inputType) int {
 	return inspectedItemsCount[0] * inspectedItemsCount[1]
 }
 
-func part1(input inputType) {
-	cp := make(inputType, len(input))
-	copy(cp, input)
+func reliefPT1(v int) int {
+	return v / 3
+}
 
-	runRounds(cp, 20)
+func getReliefPT2(mmc int) func(int) int {
+	return func(v int) int {
+		return v % mmc
+	}
+}
+
+func part1(input inputType) {
+	cp := make([]monkey, len(input.monkeys))
+	copy(cp, input.monkeys)
+
+	relief := reliefPT1
+
+	runRounds(cp, 20, relief)
 	answer := calcMonkeyBusinessLevel(cp)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputType) {
-	answer := ""
+	cp := make([]monkey, len(input.monkeys))
+	copy(cp, input.monkeys)
+
+	relief := getReliefPT2(input.mmc)
+
+	runRounds(cp, 10000, relief)
+	answer := calcMonkeyBusinessLevel(cp)
 	fmt.Println("part 2:", answer)
 }
 
