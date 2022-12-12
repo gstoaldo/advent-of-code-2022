@@ -31,3 +31,8 @@ func TestBFS(t *testing.T) {
 	got := bfs(example1.grid, example1.start, example1.end)
 	utils.Assert(t, 31, got)
 }
+
+func TestFindBestStart(t *testing.T) {
+	got := findBestStart(example1.grid, example1.end)
+	utils.Assert(t, 29, got)
+}

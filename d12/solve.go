@@ -19,21 +19,9 @@ func inGrid(grid [][]string, p position) bool {
 	return p.i >= 0 && p.i < len(grid) && p.j >= 0 && p.j < len(grid[0])
 }
 
-func replace(s string) string {
-	if s == "S" {
-		return "a"
-	}
-
-	if s == "E" {
-		return "z"
-	}
-
-	return s
-}
-
 func deltaHeight(grid [][]string, pStart position, pEnd position) int {
-	start := replace(grid[pStart.i][pStart.j])
-	end := replace(grid[pEnd.i][pEnd.j])
+	start := grid[pStart.i][pStart.j]
+	end := grid[pEnd.i][pEnd.j]
 
 	return int(float64(int(end[0]) - int(start[0])))
 }
@@ -80,8 +68,6 @@ func bfs(grid [][]string, start position, end position) int {
 			}
 		}
 
-		print(grid, visited, end)
-
 		stepQueue = nextStepQueue
 		nextStepQueue = []position{}
 		step++
@@ -90,26 +76,33 @@ func bfs(grid [][]string, start position, end position) int {
 	return -1
 }
 
-func print(grid [][]string, visited map[position]int, end position) {
+func findStartCandidates(grid [][]string) []position {
+	candidates := []position{}
 	for i, row := range grid {
-		for j, s := range row {
-			v := s
-
-			if _, ok := visited[position{i, j}]; ok {
-				v = "[*]"
-			} else {
-				v = fmt.Sprintf(" %v ", v)
+		for j, r := range row {
+			if string(r) == "a" {
+				candidates = append(candidates, position{i, j})
 			}
-
-			if i == end.i && j == end.j {
-				v = fmt.Sprintf("{%v}", v)
-			}
-
-			fmt.Printf("%v", v)
 		}
-
-		fmt.Printf("\n")
 	}
+
+	return candidates
+}
+
+func findBestStart(grid [][]string, end position) int {
+	startCandidates := findStartCandidates(grid)
+
+	minSteps := 999
+
+	for _, start := range startCandidates {
+		nsteps := bfs(grid, start, end)
+
+		if nsteps < minSteps && nsteps >= 0 {
+			minSteps = nsteps
+		}
+	}
+
+	return minSteps
 }
 
 func part1(input inputType) {
@@ -118,7 +111,7 @@ func part1(input inputType) {
 }
 
 func part2(input inputType) {
-	answer := ""
+	answer := findBestStart(input.grid, input.end)
 	fmt.Println("part 2:", answer)
 }
 
