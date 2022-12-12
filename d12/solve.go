@@ -41,36 +41,35 @@ func findNeighbors(grid [][]string, p position) []position {
 }
 
 func bfs(grid [][]string, start position, end position) int {
-	step := 0
-	stepQueue := []position{start}
-	nextStepQueue := []position{}
-	visited := map[position]int{}
-	visited[start] = step
+	queue := []struct {
+		p     position
+		steps int
+	}{{start, 0}}
 
-	for n := 0; n < 1000; n++ {
-		for len(stepQueue) > 0 {
-			head := stepQueue[0]
-			stepQueue = stepQueue[1:]
+	visited := map[position]bool{}
 
-			if head == end {
-				return step
-			}
+	for len(queue) > 0 {
+		head := queue[0]
+		queue = queue[1:]
 
-			neighbours := findNeighbors(grid, head)
-
-			for _, neighbour := range neighbours {
-				dist, ok := visited[neighbour]
-
-				if !ok || (step+1) < dist {
-					visited[neighbour] = step + 1
-					nextStepQueue = append(nextStepQueue, neighbour)
-				}
-			}
+		if _, ok := visited[head.p]; ok {
+			continue
 		}
 
-		stepQueue = nextStepQueue
-		nextStepQueue = []position{}
-		step++
+		if head.p == end {
+			return head.steps
+		}
+
+		visited[head.p] = true
+
+		neighbours := findNeighbors(grid, head.p)
+
+		for _, neighbour := range neighbours {
+			queue = append(queue, struct {
+				p     position
+				steps int
+			}{neighbour, head.steps + 1})
+		}
 	}
 
 	return -1
