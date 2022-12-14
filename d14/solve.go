@@ -12,7 +12,7 @@ type pointT struct {
 	y int
 }
 
-type blockedT map[pointT]bool // set
+type blockedT map[pointT]bool
 
 func add(p1 pointT, p2 pointT) pointT {
 	return pointT{p1.x + p2.x, p1.y + p2.y}
@@ -78,19 +78,20 @@ func getMaxY(rocks blockedT) int {
 	return maxY
 }
 
-func simulate(rocks blockedT, source pointT, maxY int) int {
+func simulate(rocks blockedT, source pointT, useFloor bool, maxY int, stopFunc func(pointT) bool) int {
 	sands := blockedT{}
 
 	p0 := source
+	p1 := pointT{}
 
-	for p0.y <= maxY {
-		p1 := getNextPoint(p0, rocks, sands)
+	for stopFunc(p1) {
+		p1 = getNextPoint(p0, rocks, sands)
+		// draw(485, -1, 30, 15, rocks, sands, p0)
 
-		if p0 == p1 {
-			sands[p0] = true
+		if p0 == p1 || (useFloor && p1.y == maxY-1) {
+			sands[p1] = true
 			p0 = source
 		} else {
-			// draw(494, 0, 20, 20, rocks, sands, p0)
 			p0 = p1
 		}
 	}
@@ -128,12 +129,16 @@ func draw(x0 int, y0 int, width int, height int, rocks blockedT, sands blockedT,
 func part1(input inputT) {
 	rocks := getRocks(input)
 	maxY := getMaxY(rocks)
-	answer := simulate(rocks, pointT{500, 0}, maxY)
+	source := pointT{500, 0}
+	answer := simulate(rocks, source, false, maxY, func(pt pointT) bool { return pt.y <= maxY })
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputT) {
-	answer := ""
+	rocks := getRocks(input)
+	maxY := getMaxY(rocks)
+	source := pointT{500, 0}
+	answer := simulate(rocks, source, true, maxY+2, func(pt pointT) bool { return pt != source })
 	fmt.Println("part 2:", answer)
 }
 
