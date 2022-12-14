@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"strconv"
 )
 
@@ -60,6 +61,12 @@ func findCloseIndex(s string, startIndex int) int {
 }
 
 func findElementByLevel(s string, targetLevel []int) string {
+	// given a string representing a slice, find the element given the "target level"
+	// ex:
+	// slice: [1, 2, [3, 4]]
+	// targetLevel: [2,0] -> return "4", same as slice[2][0]
+	// targetLevel: [2] -> return "[3,4]", same as slice[2]
+
 	endTarget := append([]int{}, targetLevel...)
 	endTarget[len(endTarget)-1]++
 
@@ -114,14 +121,15 @@ func pairIsOrdered(pL string, pR string) (shouldContinue bool, ordered bool) {
 		if errLeft == nil && errRight != nil {
 			left = fmt.Sprintf("[%v]", left)
 			shouldContinue, ordered = pairIsOrdered(left, right)
-
 		}
 
+		// left is list, right is number
 		if errLeft != nil && errRight == nil {
 			right = fmt.Sprintf("[%v]", right)
 			shouldContinue, ordered = pairIsOrdered(left, right)
 		}
 
+		// both are list
 		if errLeft != nil && errRight != nil {
 			shouldContinue, ordered = pairIsOrdered(left, right)
 		}
@@ -131,6 +139,8 @@ func pairIsOrdered(pL string, pR string) (shouldContinue bool, ordered bool) {
 
 	return shouldContinue, ordered
 }
+
+//
 
 func sumOrderedPairIndices(pairs inputType) int {
 	sum := 0
@@ -143,13 +153,50 @@ func sumOrderedPairIndices(pairs inputType) int {
 	return sum
 }
 
+func sortPackages(packages []string) {
+	sort.Slice(packages, func(i, j int) bool {
+		_, ordered := pairIsOrdered(packages[i], packages[j])
+		return ordered
+	})
+}
+
+func findDecoderKey(input inputType) int {
+	packages := []string{}
+
+	for _, pair := range input {
+		packages = append(packages, pair...)
+	}
+
+	firstDivider := "[[2]]"
+	secondDivider := "[[6]]"
+
+	packages = append(packages, []string{firstDivider, secondDivider}...)
+
+	sortPackages(packages)
+
+	firstDividerId := 0
+	secondDividerId := 0
+
+	for i, p := range packages {
+		if p == firstDivider {
+			firstDividerId = i + 1
+		}
+
+		if p == secondDivider {
+			secondDividerId = i + 1
+		}
+	}
+
+	return firstDividerId * secondDividerId
+}
+
 func part1(input inputType) {
 	answer := sumOrderedPairIndices(input)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputType) {
-	answer := ""
+	answer := findDecoderKey(input)
 	fmt.Println("part 2:", answer)
 }
 

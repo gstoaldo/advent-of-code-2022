@@ -105,3 +105,21 @@ func TestPairIsOrdered(t *testing.T) {
 		})
 	}
 }
+
+func TestSortPackages(t *testing.T) {
+	tcs := []struct {
+		packages []string
+		want     []string
+	}{
+		{[]string{"[[1],4]", "[[2]]"}, []string{"[[1],4]", "[[2]]"}},
+		{[]string{"[[2]]", "[[1],4]"}, []string{"[[1],4]", "[[2]]"}},
+		{[]string{"[[[]]]", "[[]]", "[]"}, []string{"[]", "[[]]", "[[[]]]"}},
+	}
+
+	for _, tc := range tcs {
+		t.Run("", func(t *testing.T) {
+			sortPackages(tc.packages)
+			assert.Equal(t, tc.want, tc.packages)
+		})
+	}
+}
