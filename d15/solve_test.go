@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gstoaldo/advent-of-code-2022/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetXIntervalAtDistance(t *testing.T) {
@@ -26,6 +27,22 @@ func TestGetXIntervalAtDistance(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			got := getXIntervalAtDistance(tc.sensor, tc.dist, tc.y)
 			utils.Assert(t, tc.want, got)
+		})
+	}
+}
+
+func TestMergeIntervals(t *testing.T) {
+	tcs := []struct {
+		intervals []intervalT
+		want      []intervalT
+	}{
+		{[]intervalT{{1, 13}, {15, 16}, {13, 15}}, []intervalT{{1, 16}}},
+		{[]intervalT{{1, 13}, {15, 16}}, []intervalT{{1, 13}, {15, 16}}},
+	}
+
+	for _, tc := range tcs {
+		t.Run("", func(t *testing.T) {
+			assert.Equal(t, tc.want, mergeIntervals(tc.intervals))
 		})
 	}
 }
