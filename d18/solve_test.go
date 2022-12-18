@@ -7,6 +7,7 @@ import (
 )
 
 var example1 = parseFile("example1.txt")
+var example2 = parseFile("example2.txt")
 
 func TestIsTouchingXY(t *testing.T) {
 	tcs := []struct {
@@ -35,6 +36,8 @@ func TestCountTouchingSidesXY(t *testing.T) {
 		{filterByZ(example1, 2), 4},
 		{filterByZ(example1, 5), 0},
 		{[]cubeT{{0, 0, 0}, {0, 1, 0}, {0, 2, 0}, {0, 3, 0}, {1, 3, 0}}, 4},
+		{[]cubeT{{0, 0, 0}, {0, 1, 0}, {0, 2, 0}, {0, 3, 0}, {1, 3, 0}}, 4},
+		{filterByZ(example2, 0), 40},
 	}
 
 	for _, tc := range tcs {
@@ -62,6 +65,23 @@ func TestCountTouchingSidesZ(t *testing.T) {
 	}
 }
 
-func TestCountFreeSidesXYZ(t *testing.T) {
-	utils.Assert(t, 64, countFreeSidesXYZ(example1))
+func TestCountFreeSides3D(t *testing.T) {
+	utils.Assert(t, 64, countFreeSides3D(example1))
+}
+
+func TestGetAllAirPockets3D(t *testing.T) {
+	tcs := []struct {
+		cubes []cubeT
+		want  int
+	}{
+		{example1, 1},
+		{example2, 1},
+	}
+
+	for _, tc := range tcs {
+		t.Run("", func(t *testing.T) {
+			got := getAllAirPockets3D(tc.cubes)
+			utils.Assert(t, tc.want, len(got))
+		})
+	}
 }

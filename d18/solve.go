@@ -65,7 +65,11 @@ func countTouchingSidesZ(cubesZ1, cubesZ2 []cubeT) int {
 	return count
 }
 
-func countFreeSidesXYZ(cubes []cubeT) int {
+func countFreeSides3D(cubes []cubeT) int {
+	/*
+		Start counting free sides layer by layer (same Z) and subtract matching
+		cubes in the next layer (Z+1).
+	*/
 	count := 0
 
 	maxZ := 0
@@ -83,13 +87,115 @@ func countFreeSidesXYZ(cubes []cubeT) int {
 	return count
 }
 
+func toSlice(cubes map[cubeT]bool) []cubeT {
+	cubesSlice := []cubeT{}
+
+	for c := range cubes {
+		cubesSlice = append(cubesSlice, c)
+	}
+
+	return cubesSlice
+}
+
+func getNeighbours3D(cube cubeT) []cubeT {
+	neighbours := []cubeT{}
+
+	for _, delta := range [][]int{{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}} {
+		neighbours = append(neighbours, cubeT{cube.x + delta[0], cube.y + delta[1], cube.z + delta[2]})
+	}
+
+	return neighbours
+}
+
+func getAirPocket3D(cubesSet map[cubeT]bool, maxX, maxY, maxZ int, seed cubeT) map[cubeT]bool {
+	/*
+		Use BFS and start expanding (exploring) from seed. If a point outside the
+		limits is reached, that means it is not an air pocket.
+
+		air pocket		not air pocket
+										.
+		####					##.#
+		#..#					#..#
+		####					####
+	*/
+	queue := []cubeT{seed}
+	visited := map[cubeT]bool{seed: true}
+
+	for len(queue) > 0 {
+		head := queue[0]
+		queue = queue[1:]
+
+		neighbours := getNeighbours3D(head)
+		for _, n := range neighbours {
+			if cubesSet[n] || visited[n] {
+				continue
+			}
+
+			if n.x < 0 || n.x > maxX || n.y < 0 || n.y > maxY || n.z < 0 || n.z > maxZ {
+				return map[cubeT]bool{}
+			}
+
+			visited[n] = true
+			queue = append(queue, n)
+		}
+	}
+
+	return visited
+}
+
+func getAllAirPockets3D(cubes []cubeT) [][]cubeT {
+	maxX, maxY, maxZ := 0, 0, 0
+	cubesSet := map[cubeT]bool{}
+	allAirPockets := [][]cubeT{}
+
+	for _, c := range cubes {
+		maxX = utils.Max(maxX, c.x)
+		maxY = utils.Max(maxY, c.y)
+		maxZ = utils.Max(maxZ, c.z)
+
+		cubesSet[c] = true
+	}
+
+	seeds := map[cubeT]bool{}
+	for x := 0; x <= maxX; x++ {
+		for y := 0; y <= maxY; y++ {
+			for z := 0; z <= maxZ; z++ {
+				seed := cubeT{x, y, z}
+				if !cubesSet[seed] {
+					seeds[seed] = true
+				}
+			}
+		}
+	}
+
+	for seed := range seeds {
+		airPocket := getAirPocket3D(cubesSet, maxX, maxY, maxZ, seed)
+
+		for s := range airPocket {
+			delete(seeds, s)
+		}
+
+		if len(airPocket) > 0 {
+			allAirPockets = append(allAirPockets, toSlice(airPocket))
+		}
+	}
+
+	return allAirPockets
+}
+
 func part1(input inputT) {
-	answer := countFreeSidesXYZ(input)
+	answer := countFreeSides3D(input)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputT) {
-	answer := ""
+	answer := countFreeSides3D(input)
+
+	airPockets := getAllAirPockets3D(input)
+	for _, airPockets := range airPockets {
+		answer -= countFreeSides3D(airPockets)
+	}
+
 	fmt.Println("part 2:", answer)
 }
 
