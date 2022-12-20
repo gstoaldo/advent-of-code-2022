@@ -66,6 +66,6 @@ func TestMove(t *testing.T) {
 
 func TestMix(t *testing.T) {
 	want := []int{1, 2, -3, 4, 0, 3, -2}
-	got := mix(example)
+	got := mix(example, 1)
 	assert.Equal(t, want, got)
 }

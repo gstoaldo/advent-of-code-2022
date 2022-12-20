@@ -62,20 +62,22 @@ func move(number numberT, inputMap inputMapT) {
 	inputMap[number] = newId
 }
 
-func mix(input inputT) []int {
+func mix(input inputT, times int) []int {
 	inputMap := getInputMap(input)
 
-	for id, value := range input {
-		move(numberT{value, id}, inputMap)
+	for i := 0; i < times; i++ {
+		for id, value := range input {
+			move(numberT{value, id}, inputMap)
+		}
 	}
 
-	final := make([]int, len(inputMap))
+	mixed := make([]int, len(inputMap))
 
 	for number, id := range inputMap {
-		final[id] = number.value
+		mixed[id] = number.value
 	}
 
-	return final
+	return mixed
 }
 
 func getNth(values []int, nth int) int {
@@ -100,14 +102,28 @@ func getGroveCoordinates(values []int) int {
 	return sum
 }
 
+func applyKey(input inputT, key int) []int {
+	multiplied := []int{}
+
+	for _, value := range input {
+		multiplied = append(multiplied, value*key)
+	}
+
+	return multiplied
+}
+
 func part1(input inputT) {
-	final := mix(input)
-	answer := getGroveCoordinates(final)
+	mixed := mix(input, 1)
+	answer := getGroveCoordinates(mixed)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputT) {
-	answer := ""
+	key := 811589153
+	multiplied := applyKey(input, key)
+	mixed := mix(multiplied, 10)
+
+	answer := getGroveCoordinates(mixed)
 	fmt.Println("part 2:", answer)
 }
 
