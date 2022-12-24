@@ -89,24 +89,28 @@ func isEqual(map1 elvesMapT, map2 elvesMapT) bool {
 	return true
 }
 
-func getFinalElvesMap(initialElvesMap elvesMapT, nRounds int) elvesMapT {
+func getFinalElvesMap(initialElvesMap elvesMapT, nRounds int) (elvesMapT, int) {
 	if nRounds == 0 {
-		return initialElvesMap
+		return initialElvesMap, nRounds
 	}
 
 	currMap := elvesMapT{}
 	nextMap := initialElvesMap
 	directions := []directionT{N, S, W, E}
 
-	for n := 0; n <= nRounds && !isEqual(currMap, nextMap); n++ {
+	n := 0
+
+	for (n <= nRounds || nRounds == -1) && !isEqual(currMap, nextMap) {
 		currMap = nextMap
 		countFreeTiles(currMap)
 
 		nextMap = getNextElvesMap(currMap, directions)
 		directions = append(directions[1:], directions[0])
+
+		n++
 	}
 
-	return currMap
+	return currMap, n
 }
 
 func countFreeTiles(elvesMap elvesMapT) int {
@@ -134,13 +138,14 @@ func countFreeTiles(elvesMap elvesMapT) int {
 }
 
 func part1(input inputT) {
-	finalMap := getFinalElvesMap(elvesMapT(input), 10)
+	finalMap, _ := getFinalElvesMap(elvesMapT(input), 10)
 	answer := countFreeTiles(finalMap)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputT) {
-	answer := ""
+	_, finalRound := getFinalElvesMap(elvesMapT(input), -1)
+	answer := finalRound
 	fmt.Println("part 2:", answer)
 }
 
