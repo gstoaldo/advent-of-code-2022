@@ -76,13 +76,13 @@ func getMoveOptions(state map[positionT]int, currPosition, start, end positionT,
 	return moveOptions
 }
 
-func bfs(blizzards []blizzardT, start, end positionT, maxI, maxJ int) int {
+func bfs(blizzards []blizzardT, start, end positionT, t0, maxI, maxJ int) int {
 	type positionTime struct {
 		head positionT
 		t    int
 	}
 
-	queue := []positionTime{{start, 0}}
+	queue := []positionTime{{start, t0}}
 	visited := map[positionTime]bool{}
 
 	for len(queue) > 0 {
@@ -101,7 +101,6 @@ func bfs(blizzards []blizzardT, start, end positionT, maxI, maxJ int) int {
 
 			if !visited[pt] {
 				visited[pt] = true
-				// draw(state, moveOption, start, end, maxI, maxJ)
 				queue = append(queue, positionTime{moveOption, t + 1})
 			}
 		}
@@ -110,46 +109,21 @@ func bfs(blizzards []blizzardT, start, end positionT, maxI, maxJ int) int {
 	return -1
 }
 
-func draw(state map[positionT]int, curr, start, end positionT, maxI, maxJ int) {
-	for i := 0; i <= maxI; i++ {
-		for j := 0; j <= maxJ; j++ {
-			p := positionT{i, j}
-			i, ok := state[p]
+func threeWayTrip(input inputT) int {
+	t1 := bfs(input.blizzards, input.start, input.end, 0, input.maxI, input.maxJ)
+	t2 := bfs(input.blizzards, input.end, input.start, t1, input.maxI, input.maxJ)
+	t3 := bfs(input.blizzards, input.start, input.end, t2, input.maxI, input.maxJ)
 
-			if p == curr && !ok {
-				fmt.Printf("%v", "E")
-				continue
-			}
-
-			if p == curr && ok {
-				fmt.Printf("%v", "X")
-				continue
-			}
-
-			if !inBounds(p, start, end, maxI, maxJ) {
-				fmt.Printf("%v", "#")
-				continue
-			}
-
-			if ok {
-				fmt.Printf("%v", i)
-			} else {
-				fmt.Printf("%v", ".")
-			}
-
-		}
-		fmt.Println()
-	}
-	fmt.Println()
+	return t3
 }
 
 func part1(input inputT) {
-	answer := bfs(input.blizzards, input.start, input.end, input.maxI, input.maxJ)
+	answer := bfs(input.blizzards, input.start, input.end, 0, input.maxI, input.maxJ)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputT) {
-	answer := ""
+	answer := threeWayTrip(input)
 	fmt.Println("part 2:", answer)
 }
 
