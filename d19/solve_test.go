@@ -8,7 +8,7 @@ import (
 
 var example = parseFile("example.txt")
 
-func TestAssembleNow(t *testing.T) {
+func TestBuildNow(t *testing.T) {
 
 	state := stateT{
 		resources: []int{2, 0, 0, 0},
@@ -17,7 +17,7 @@ func TestAssembleNow(t *testing.T) {
 	}
 	bp := example[0]
 
-	nextState := assembleNow(state, bp[1], 1)
+	nextState := buildNow(state, bp[1], 1)
 
 	assert.Equal(t, 3, nextState.minute)
 	assert.Equal(t, []int{1, 0, 0, 0}, nextState.resources)

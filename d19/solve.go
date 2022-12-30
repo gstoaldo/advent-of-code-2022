@@ -16,7 +16,7 @@ type stateT struct {
 	minute    int
 }
 
-func canAssembleNow(state stateT, cost []int) bool {
+func canBuildNow(state stateT, cost []int) bool {
 	for i, amount := range state.resources {
 		if amount < cost[i] {
 			return false
@@ -25,7 +25,7 @@ func canAssembleNow(state stateT, cost []int) bool {
 	return true
 }
 
-func canAssembleInTheFuture(state stateT, cost []int) bool {
+func canBuildInTheFuture(state stateT, cost []int) bool {
 	for i, resourceCost := range cost {
 		if state.robots[i] == 0 && resourceCost != 0 {
 			return false
@@ -48,7 +48,7 @@ func doNothing(state stateT) stateT {
 	return nextState
 }
 
-func assembleNow(state stateT, cost []int, robotId int) stateT {
+func buildNow(state stateT, cost []int, robotId int) stateT {
 	nextState := stateT{
 		resources: append([]int{}, state.resources...),
 		robots:    append([]int{}, state.robots...),
@@ -59,8 +59,8 @@ func assembleNow(state stateT, cost []int, robotId int) stateT {
 		nextState.resources[i] = state.resources[i] + state.robots[i]
 	}
 
-	if !canAssembleNow(state, cost) {
-		panic("not enough resources to assemble robot")
+	if !canBuildNow(state, cost) {
+		panic("not enough resources to build robot")
 	}
 
 	nextState.robots[robotId]++
@@ -79,23 +79,42 @@ func simulateBlueprint(bp blueprintT, maxTime int) []stateT {
 		minute:    0,
 	}
 
-	visited := map[string]bool{}
+	visited := map[string][][]int{}
 	queue := []stateT{initialState}
 
 	addToQueue := func(state stateT) {
-		key := fmt.Sprintf("%v, %v, %v", state.minute, state.robots, state.resources)
+		// for a given minute, states that have the same amount of robots but
+		// fewer of all resources, should not be added to the queue.
 
-		if !visited[key] {
+		key := fmt.Sprintf("%v, %v", state.minute, state.robots)
+		allResources, ok := visited[key]
+
+		if !ok {
 			queue = append(queue, state)
-			visited[key] = true
+			visited[key] = append(visited[key], state.resources)
+			return
 		}
+
+		for _, resource := range allResources {
+			fewer := true
+			for i, r := range resource {
+				fewer = fewer && state.resources[i] <= r
+			}
+
+			if fewer {
+				return
+			}
+		}
+
+		queue = append(queue, state)
+		visited[key] = append(visited[key], state.resources)
 	}
 
-	resourceMax := make([]int, 4)
+	maxConsuptionRate := make([]int, 4)
 
 	for _, robotCost := range bp {
 		for i, value := range robotCost {
-			resourceMax[i] = utils.Max(resourceMax[i], value)
+			maxConsuptionRate[i] = utils.Max(maxConsuptionRate[i], value)
 		}
 	}
 
@@ -109,18 +128,20 @@ func simulateBlueprint(bp blueprintT, maxTime int) []stateT {
 		for robotId := range bp {
 			cost := bp[robotId]
 
-			if state.robots[robotId] == resourceMax[robotId] && robotId < 3 {
+			if state.robots[robotId] == maxConsuptionRate[robotId] && robotId < 3 {
+				// we can build only one robot per minute, so it doesnt make sense
+				// to have more robots than the consuption rate.
+				// except for the geode robot, that we want to build as much as we can.
 				continue
 			}
 
-			if canAssembleNow(state, cost) {
-				nextState := assembleNow(state, cost, robotId)
+			if canBuildNow(state, cost) {
+				nextState := buildNow(state, cost, robotId)
 				addToQueue(nextState)
-
 				continue
 			}
 
-			shouldWait = shouldWait || canAssembleInTheFuture(state, cost)
+			shouldWait = shouldWait || canBuildInTheFuture(state, cost)
 		}
 
 		if shouldWait {
@@ -144,7 +165,6 @@ func getMaxGeode(states []stateT) int {
 func getQualityLevelSum(blueprints inputT) int {
 	sum := 0
 	for i, bp := range blueprints {
-		fmt.Println("bp:", i)
 		states := simulateBlueprint(bp, 24)
 		maxGeode := getMaxGeode(states)
 		sum += (i + 1) * maxGeode
@@ -153,13 +173,24 @@ func getQualityLevelSum(blueprints inputT) int {
 	return sum
 }
 
+func getBlueprintProduct(blueprints inputT, n int) int {
+	product := 1
+	for _, bp := range blueprints[:n] {
+		states := simulateBlueprint(bp, 32)
+		maxGeode := getMaxGeode(states)
+		product *= maxGeode
+	}
+
+	return product
+}
+
 func part1(input inputT) {
 	answer := getQualityLevelSum(input)
 	fmt.Println("part 1:", answer)
 }
 
 func part2(input inputT) {
-	answer := ""
+	answer := getBlueprintProduct(input, 3)
 	fmt.Println("part 2:", answer)
 }
 
