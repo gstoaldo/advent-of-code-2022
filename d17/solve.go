@@ -77,17 +77,82 @@ func getHeight(blocked map[pointT]bool) int {
 	return max
 }
 
+func snapshot(blocked map[pointT]bool, height int) string {
+	/*
+		starting from the top, get string snapshot of the top rows
+		representing the state of the tower.
+
+		the snapshotHeight must be adjusted by trial and error until the solution
+		converges.
+	*/
+	snapshotHeight := 5
+
+	hash := ""
+
+	for y := height; y > height-snapshotHeight; y-- {
+		rowHash := ""
+		for x := 0; x < 7; x++ {
+			p := pointT{x, y}
+			if blocked[p] {
+				rowHash += "#"
+			} else {
+				rowHash += "."
+			}
+		}
+		hash += rowHash + "\n"
+	}
+
+	return hash
+}
+
 func simulate(jets inputT, nrocks int) int {
 	blocked := map[pointT]bool{}
+	visited := map[string]struct {
+		height, npieces int
+	}{}
 
 	height := 0
 	x0 := 2
 	jetIndex := -1
 
+	alreadyAdvanced := false
+	advancedHeight := 0
+
+	cacheKey := func(jetIndex, shapeIndex int) string {
+		/*
+			when a new rock begins to fall, check if the snapshot of the top rows has already
+			happened for the same jet and shape index.
+
+			the key then is a string that captures the jet, shape and snapshot.
+		*/
+		return fmt.Sprintf("%v, %v\n%v", jetIndex, shapeIndex, snapshot(blocked, height))
+	}
+
 	for n := 0; n < nrocks; n++ {
 		y0 := height + 3
 		shapePoints := shapes[n%len(shapes)]
 		shape := getAbsoluteShape(x0, y0, shapePoints)
+
+		key := cacheKey(jetIndex, n%len(shapes))
+		if cache, ok := visited[key]; ok && !alreadyAdvanced {
+			/*
+				If a repetition is found, calculate the height that can be advanced.
+				The simulation continues to complete the last pieces.
+			*/
+
+			deltaHeight := height - cache.height
+			deltaPieces := n - cache.npieces
+			repetition := (nrocks-cache.npieces)/deltaPieces - 1
+			advancedHeight = repetition * deltaHeight
+			n += repetition*deltaPieces - 1
+			alreadyAdvanced = true
+			continue
+		}
+
+		visited[key] = struct {
+			height  int
+			npieces int
+		}{height, n}
 
 		for {
 			jetIndex++
@@ -116,7 +181,7 @@ func simulate(jets inputT, nrocks int) int {
 		}
 	}
 
-	return height
+	return height + advancedHeight
 }
 
 func draw(x0, y0, w, h int, shape []pointT, blocked map[pointT]bool) {
@@ -155,7 +220,7 @@ func part1(input inputT) {
 }
 
 func part2(input inputT) {
-	answer := ""
+	answer := simulate(input, 1_000_000_000_000)
 	fmt.Println("part 2:", answer)
 }
 
